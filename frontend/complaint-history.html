@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaints ComplaintOS</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav id="navbar"></nav>
+    <main class="container">
+        <div class="header-actions">
+            <h1>Complaints</h1>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <input type="text" id="searchInput" placeholder="Search by title..." style="max-width: 300px;">
+        </div>
+        <div id="table-container">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+    </main>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        requireAuth();
+        let allComplaints = [];
+        async function loadComplaints() {
+            try {
+                allComplaints = await api.get('/complaints');
+                renderTable(allComplaints);
+            } catch (error) {
+                showToast(error.message, 'error');
+                showEmpty('table-container', 'Failed to load complaints');
+            }
+        }
+        function renderTable(data) {
+            const container = document.getElementById('table-container');
+            if (data.length === 0) {
+                showEmpty('table-container', 'No complaints found');
+                return;
+            }
+            let html = `
+                <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            data.forEach(c => {
+                html += `
+                    <tr>
+                        <td><a href="/static/complaint-details.html?id=${c.id}">${escapeHtml(c.title)}</a></td>
+                        <td>${escapeHtml(c.domain_name || 'Unassigned')}</td>
+                        <td><span class="badge ${priorityBadgeClass(c.priority)}">${c.priority}</span></td>
+                        <td><span class="badge ${statusBadgeClass(c.status)}">${c.status}</span></td>
+                        <td>${formatDate(c.created_at)}</td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allComplaints.filter(c => c.title.toLowerCase().includes(term));
+            renderTable(filtered);
+        });
+        loadComplaints();
+    </script>
+</body>
+</html>

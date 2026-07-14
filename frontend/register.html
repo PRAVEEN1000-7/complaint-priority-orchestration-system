@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register ComplaintOS</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h1>ComplaintOS</h1>
+        <p>Create a new account</p>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" required minlength="6">
+            </div>
+            <div id="errorMsg" style="display:none; color: var(--p1); margin-bottom: 1rem; font-size: 0.9rem;"></div>
+            <button type="submit" id="registerBtn" class="btn btn-primary btn-block">Register</button>
+        </form>
+        <p style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem;">
+            Already have an account? <a href="/static/login.html">Sign in</a>
+        </p>
+    </div>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('registerBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Registering...';
+            try {
+                await api.post('/register', {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    confirm_password: document.getElementById('confirm_password').value
+                });
+                showToast('Registration successful! Please login.', 'success');
+                setTimeout(() => window.location.href = '/static/login.html', 1500);
+            } catch (error) {
+                errorMsg.textContent = error.message;
+                errorMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Register';
+            }
+        });
+    </script>
+</body>
+</html>

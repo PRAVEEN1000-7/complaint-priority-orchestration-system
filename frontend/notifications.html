@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications ComplaintOS</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav id="navbar"></nav>
+    <main class="container">
+        <div class="header-actions">
+            <h1>Notifications</h1>
+        </div>
+        <div id="content-container">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+    </main>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        requireAuth();
+        async function loadNotifications() {
+            try {
+                const notifs = await api.get('/notifications');
+                const container = document.getElementById('content-container');
+                if (notifs.length === 0) {
+                    showEmpty('content-container', 'No new notifications');
+                    return;
+                }
+                let html = `
+                    <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                notifs.forEach(n => {
+                    html += `
+                        <tr style="${n.read_status ? 'opacity: 0.7;' : 'font-weight: 600; background: var(--bg-alt);'}">
+                            <td>${escapeHtml(n.message)}</td>
+                            <td>${formatDate(n.created_at)}</td>
+                            <td>
+                                <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="markRead('${n.id}', '${n.complaint_id}')">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table></div>`;
+                container.innerHTML = html;
+            } catch (error) {
+                showToast(error.message, 'error');
+                showEmpty('content-container', 'Failed to load notifications');
+            }
+        }
+        async function markRead(notifId, complaintId) {
+            try {
+                await api.put(`/notifications/${notifId}/read`);
+                window.location.href = `/static/complaint-details.html?id=${complaintId}`;
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        loadNotifications();
+    </script>
+</body>
+</html>

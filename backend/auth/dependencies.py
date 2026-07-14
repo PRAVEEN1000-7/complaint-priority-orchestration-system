@@ -1,0 +1,85 @@
+"""
+FastAPI dependencies for authentication and role-based authorization.
+"""
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
+from backend.auth.jwt_handler import verify_access_token
+from backend.database.connection import get_db
+from backend.models.user import User
+from backend.utils.logger import setup_logger
+logger = setup_logger(__name__)
+security = HTTPBearer()
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),
+) -> User:
+    """
+    Dependency that extracts the JWT from the Authorization header,
+    verifies it, and returns the corresponding User.
+    Raises:
+        HTTPException 401: If token is missing, invalid, or user not found.
+    """
+    token = credentials.credentials
+    payload = verify_access_token(token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user_id: str = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Dependency that ensures the current user has the 'admin' role.
+    Raises:
+        HTTPException 403: If the user is not an admin.
+    """
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
+def require_domain_head(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Dependency that ensures the current user has the 'domain_head' role.
+    Raises:
+        HTTPException 403: If the user is not a domain head.
+    """
+    if current_user.role != "domain_head":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Domain Head access required",
+        )
+    return current_user
+def require_roles(*roles: str):
+    """
+    Factory for a dependency that ensures the current user has one of the given roles.
+    Args:
+        *roles: Allowed role strings (e.g., 'admin', 'domain_head').
+    Returns:
+        A FastAPI dependency function.
+    """
+    def role_checker(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access restricted to roles: {', '.join(roles)}",
+            )
+        return current_user
+    return role_checker
