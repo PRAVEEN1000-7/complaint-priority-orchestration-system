@@ -19,7 +19,7 @@ An AI-powered complaint management system that automatically analyzes complaints
 | Frontend | HTML5, CSS3, Vanilla JavaScript |
 | Backend  | FastAPI, SQLAlchemy, Pydantic   |
 | Database | PostgreSQL                      |
-| AI       | Gemini API, LangGraph           |
+| AI       | Groq API, LangGraph             |
 | Auth     | JWT (python-jose), bcrypt       |
 
 ## Quick Start
