@@ -1,53 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard ComplaintOS</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
     <nav id="navbar"></nav>
     <main class="container">
-        <div class="header-actions">
-            <h1>Dashboard</h1>
-            <a href="/static/submit-complaint.html" class="btn btn-primary" id="btn-submit-complaint" style="display:none;">Submit Complaint</a>
+      <div class="header-actions">
+        <h1>Dashboard</h1>
+        <a
+          href="/static/submit-complaint.html"
+          class="btn btn-primary"
+          id="btn-submit-complaint"
+          style="display: none"
+          >Submit Complaint</a
+        >
+      </div>
+      <div class="grid" id="stats-container"></div>
+      <div class="card">
+        <h3
+          style="
+            color: var(--text);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-transform: none;
+            letter-spacing: normal;
+          "
+        >
+          Recent Activity
+        </h3>
+        <div id="recent-activity-container">
+          <div class="loading-spinner"><div class="spinner"></div></div>
         </div>
-        <div class="grid" id="stats-container">
-        </div>
-        <div class="card">
-            <h3 style="color: var(--text); font-size: 1.1rem; margin-bottom: 1rem; text-transform: none; letter-spacing: normal;">Recent Activity</h3>
-            <div id="recent-activity-container">
-                <div class="loading-spinner"><div class="spinner"></div></div>
-            </div>
-        </div>
+      </div>
     </main>
     <script src="/static/js/api.js"></script>
     <script src="/static/js/app.js"></script>
     <script>
-        requireAuth();
-        const user = getUser();
-        if (user.role === 'user') {
-            document.getElementById('btn-submit-complaint').style.display = 'inline-block';
-        }
-        async function loadDashboardData() {
-            try {
-                const data = await api.get('/dashboard');
-                const { recent_complaints, ...stats } = data;
-                const statsHtml = Object.entries(stats).map(([key, val]) => `
+      requireAuth();
+      const user = getUser();
+      if (user.role === "user") {
+        document.getElementById("btn-submit-complaint").style.display =
+          "inline-block";
+      }
+      async function loadDashboardData() {
+        try {
+          const data = await api.get("/dashboard");
+          const { recent_complaints, ...stats } = data;
+          const statsHtml = Object.entries(stats)
+            .map(
+              ([key, val]) => `
                     <div class="card">
-                        <h3>${key.replace(/_/g, ' ')}</h3>
+                        <h3>${key.replace(/_/g, " ")}</h3>
                         <div class="value">${val}</div>
                     </div>
-                `).join('');
-                document.getElementById('stats-container').innerHTML = statsHtml;
-                const recent = recent_complaints || [];
-                const container = document.getElementById('recent-activity-container');
-                if (recent.length === 0) {
-                    showEmpty('recent-activity-container', 'No recent complaints');
-                    return;
-                }
-                let html = `
+                `,
+            )
+            .join("");
+          document.getElementById("stats-container").innerHTML = statsHtml;
+          const recent = recent_complaints || [];
+          const container = document.getElementById(
+            "recent-activity-container",
+          );
+          if (recent.length === 0) {
+            showEmpty("recent-activity-container", "No recent complaints");
+            return;
+          }
+          let html = `
                     <div class="table-responsive">
                     <table>
                         <thead>
@@ -60,8 +82,8 @@
                         </thead>
                         <tbody>
                 `;
-                recent.forEach(c => {
-                    html += `
+          recent.forEach((c) => {
+            html += `
                         <tr>
                             <td><a href="/static/complaint-details.html?id=${c.id}">${escapeHtml(c.title)}</a></td>
                             <td><span class="badge ${priorityBadgeClass(c.priority)}">${c.priority}</span></td>
@@ -69,15 +91,15 @@
                             <td>${formatDate(c.created_at)}</td>
                         </tr>
                     `;
-                });
-                html += `</tbody></table></div>`;
-                container.innerHTML = html;
-            } catch (error) {
-                showToast(error.message, 'error');
-                showEmpty('recent-activity-container', 'Failed to load data');
-            }
+          });
+          html += `</tbody></table></div>`;
+          container.innerHTML = html;
+        } catch (error) {
+          showToast(error.message, "error");
+          showEmpty("recent-activity-container", "Failed to load data");
         }
-        loadDashboardData();
+      }
+      loadDashboardData();
     </script>
-</body>
+  </body>
 </html>

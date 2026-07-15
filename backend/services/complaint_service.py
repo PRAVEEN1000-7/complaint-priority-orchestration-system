@@ -1,6 +1,3 @@
-"""
-Business logic for complaint operations.
-"""
 from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -19,10 +16,12 @@ from backend.schemas.complaint import (
 )
 from backend.orchestrator.workflow import run_orchestrator
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
 VALID_STATUSES = ["Submitted", "Under Review", "In Progress", "Resolved", "Closed"]
+
+
 def _enrich_complaint(complaint: Complaint, db: Session) -> dict:
-    """Add domain_name and domain_head_name to a complaint dict."""
     domain_name = None
     domain_head_name = None
     if complaint.domain_id:
@@ -54,23 +53,11 @@ def _enrich_complaint(complaint: Complaint, db: Session) -> dict:
         "created_at": complaint.created_at,
         "updated_at": complaint.updated_at,
     }
+
+
 def submit_complaint(
     request: ComplaintCreate, user_id: UUID, db: Session
 ) -> ComplaintSubmitResponse:
-    """
-    Submit a new complaint and run the AI orchestrator.
-    1. Validate the domain exists
-    2. Create the complaint record
-    3. Run the AI orchestrator
-    4. Update complaint with AI results
-    5. Create notification for domain head
-    Args:
-        request: Complaint creation data.
-        user_id: ID of the complaint creator.
-        db: Database session.
-    Returns:
-        Complaint submission response with AI results.
-    """
     domain = db.query(Domain).filter(Domain.id == request.domain_id).first()
     if not domain:
         raise HTTPException(
@@ -83,7 +70,7 @@ def submit_complaint(
         domain_id=request.domain_id,
         created_by=user_id,
         status="Submitted",
-        priority="P4",  
+        priority="P4",
     )
     db.add(complaint)
     db.commit()
@@ -124,7 +111,9 @@ def submit_complaint(
             complaint.assigned_domain_head,
         )
     except Exception as e:
-        logger.error("AI orchestrator failed for complaint %s: %s", complaint.id, str(e))
+        logger.error(
+            "AI orchestrator failed for complaint %s: %s", complaint.id, str(e)
+        )
     domain = db.query(Domain).filter(Domain.id == complaint.domain_id).first()
     return ComplaintSubmitResponse(
         id=complaint.id,
@@ -135,11 +124,9 @@ def submit_complaint(
         ai_reason=complaint.ai_reason,
         created_at=complaint.created_at,
     )
+
+
 def get_complaints_for_user(user_id: UUID, db: Session) -> list[ComplaintResponse]:
-    """
-    Get complaints created by a specific user.
-    Identity is tracked internally but never exposed in the response.
-    """
     complaints = (
         db.query(Complaint)
         .filter(Complaint.created_by == user_id)
@@ -147,12 +134,11 @@ def get_complaints_for_user(user_id: UUID, db: Session) -> list[ComplaintRespons
         .all()
     )
     return [ComplaintResponse(**_enrich_complaint(c, db)) for c in complaints]
+
+
 def get_complaints_for_domain_head(
     user_id: UUID, db: Session
 ) -> list[ComplaintResponse]:
-    """
-    Get complaints assigned to a domain head, sorted by priority (P1 first).
-    """
     dh = db.query(DomainHead).filter(DomainHead.user_id == user_id).first()
     if not dh:
         return []
@@ -165,21 +151,14 @@ def get_complaints_for_domain_head(
     )
     complaints.sort(key=lambda c: priority_order.get(c.priority, 5))
     return [ComplaintResponse(**_enrich_complaint(c, db)) for c in complaints]
+
+
 def get_all_complaints(db: Session) -> list[ComplaintResponse]:
-    """Get all complaints (admin view)."""
-    complaints = (
-        db.query(Complaint)
-        .order_by(desc(Complaint.created_at))
-        .all()
-    )
+    complaints = db.query(Complaint).order_by(desc(Complaint.created_at)).all()
     return [ComplaintResponse(**_enrich_complaint(c, db)) for c in complaints]
-def get_complaint_detail(
-    complaint_id: UUID, db: Session
-) -> ComplaintDetailResponse:
-    """
-    Get detailed view of a single complaint.
-    Never includes created_by.
-    """
+
+
+def get_complaint_detail(complaint_id: UUID, db: Session) -> ComplaintDetailResponse:
     complaint = db.query(Complaint).filter(Complaint.id == complaint_id).first()
     if not complaint:
         raise HTTPException(
@@ -187,15 +166,14 @@ def get_complaint_detail(
             detail="Complaint not found",
         )
     return ComplaintDetailResponse(**_enrich_complaint(complaint, db))
+
+
 def update_complaint(
     complaint_id: UUID,
     request: ComplaintUpdate,
     user_id: UUID,
     db: Session,
 ) -> ComplaintDetailResponse:
-    """
-    Update complaint status and/or remarks (domain head action).
-    """
     complaint = db.query(Complaint).filter(Complaint.id == complaint_id).first()
     if not complaint:
         raise HTTPException(

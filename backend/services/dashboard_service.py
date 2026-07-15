@@ -1,22 +1,13 @@
-"""
-Business logic for dashboard statistics.
-"""
 from uuid import UUID
 from sqlalchemy.orm import Session
 from backend.models.complaint import Complaint
 from backend.models.domain_head import DomainHead
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
+
+
 def get_user_dashboard(user_id: UUID, db: Session) -> dict:
-    """
-    Get dashboard statistics for a regular user.
-    Args:
-        user_id: The user's ID.
-        db: Database session.
-    Returns:
-        Dictionary with total, pending, and resolved complaint counts,
-        plus a list of recent complaints.
-    """
     total = db.query(Complaint).filter(Complaint.created_by == user_id).count()
     resolved = (
         db.query(Complaint)
@@ -57,15 +48,9 @@ def get_user_dashboard(user_id: UUID, db: Session) -> dict:
         "pending_complaints": pending,
         "recent_complaints": recent_list,
     }
+
+
 def get_domain_head_dashboard(user_id: UUID, db: Session) -> dict:
-    """
-    Get dashboard statistics for a domain head.
-    Args:
-        user_id: The domain head user's ID.
-        db: Database session.
-    Returns:
-        Dictionary with assigned, pending, resolved, and critical counts.
-    """
     dh = db.query(DomainHead).filter(DomainHead.user_id == user_id).first()
     if not dh:
         return {

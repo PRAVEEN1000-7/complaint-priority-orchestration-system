@@ -14,13 +14,13 @@ An AI-powered complaint management system that automatically analyzes complaints
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
+| Layer    | Technology                      |
+| -------- | ------------------------------- |
 | Frontend | HTML5, CSS3, Vanilla JavaScript |
-| Backend | FastAPI, SQLAlchemy, Pydantic |
-| Database | PostgreSQL |
-| AI | Gemini API, LangGraph |
-| Auth | JWT (python-jose), bcrypt |
+| Backend  | FastAPI, SQLAlchemy, Pydantic   |
+| Database | PostgreSQL                      |
+| AI       | Gemini API, LangGraph           |
+| Auth     | JWT (python-jose), bcrypt       |
 
 ## Quick Start
 
@@ -61,7 +61,7 @@ pip install -r requirements.txt
 uvicorn backend.main:app --reload
 ```
 
-The app will start at `http://localhost:8000`. 
+The app will start at `http://localhost:8000`.
 
 - Frontend: `http://localhost:8000/static/login.html`
 - API Docs: `http://localhost:8000/docs`
@@ -98,26 +98,26 @@ complaint-priority-system/
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | /api/register | Register user | Public |
-| POST | /api/login | Login | Public |
-| GET | /api/domains | List domains | Auth |
-| POST | /api/domains | Create domain | Admin |
-| PUT | /api/domains/{id} | Update domain | Admin |
-| DELETE | /api/domains/{id} | Delete domain | Admin |
-| POST | /api/complaints | Submit complaint | Auth |
-| GET | /api/complaints | List complaints | Auth |
-| GET | /api/complaints/{id} | Complaint details | Auth |
-| PUT | /api/complaints/{id} | Update complaint | DH/Admin |
-| GET | /api/notifications | Get notifications | Auth |
-| GET | /api/dashboard | Dashboard stats | Auth |
-| GET | /api/domain-head/complaints | Assigned complaints | DH |
-| PUT | /api/domain-head/status/{id} | Update status | DH |
-| POST | /api/admin/domain-heads | Create domain head | Admin |
-| GET | /api/admin/domain-heads | List domain heads | Admin |
-| GET | /api/admin/users | List users | Admin |
-| GET | /api/admin/statistics | Admin stats | Admin |
+| Method | Endpoint                     | Description         | Access   |
+| ------ | ---------------------------- | ------------------- | -------- |
+| POST   | /api/register                | Register user       | Public   |
+| POST   | /api/login                   | Login               | Public   |
+| GET    | /api/domains                 | List domains        | Auth     |
+| POST   | /api/domains                 | Create domain       | Admin    |
+| PUT    | /api/domains/{id}            | Update domain       | Admin    |
+| DELETE | /api/domains/{id}            | Delete domain       | Admin    |
+| POST   | /api/complaints              | Submit complaint    | Auth     |
+| GET    | /api/complaints              | List complaints     | Auth     |
+| GET    | /api/complaints/{id}         | Complaint details   | Auth     |
+| PUT    | /api/complaints/{id}         | Update complaint    | DH/Admin |
+| GET    | /api/notifications           | Get notifications   | Auth     |
+| GET    | /api/dashboard               | Dashboard stats     | Auth     |
+| GET    | /api/domain-head/complaints  | Assigned complaints | DH       |
+| PUT    | /api/domain-head/status/{id} | Update status       | DH       |
+| POST   | /api/admin/domain-heads      | Create domain head  | Admin    |
+| GET    | /api/admin/domain-heads      | List domain heads   | Admin    |
+| GET    | /api/admin/users             | List users          | Admin    |
+| GET    | /api/admin/statistics        | Admin stats         | Admin    |
 
 ## AI Workflow
 

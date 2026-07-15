@@ -1,44 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Complaint Details ComplaintOS</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
     <nav id="navbar"></nav>
     <main class="container">
-        <div class="header-actions">
-            <h1>Complaint Details</h1>
-            <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
-        </div>
-        <div id="content-container">
-            <div class="loading-spinner"><div class="spinner"></div></div>
-        </div>
+      <div class="header-actions">
+        <h1>Complaint Details</h1>
+        <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
+      </div>
+      <div id="content-container">
+        <div class="loading-spinner"><div class="spinner"></div></div>
+      </div>
     </main>
     <script src="/static/js/api.js"></script>
     <script src="/static/js/app.js"></script>
     <script>
-        requireAuth();
-        const user = getUser();
-        const urlParams = new URLSearchParams(window.location.search);
-        const complaintId = urlParams.get('id');
-        if (!complaintId) window.location.href = '/static/dashboard.html';
-        async function loadDetails() {
-            try {
-                const c = await api.get(`/complaints/${complaintId}`);
-                renderDetails(c);
-            } catch (error) {
-                showToast(error.message, 'error');
-                showEmpty('content-container', 'Failed to load details');
-            }
+      requireAuth();
+      const user = getUser();
+      const urlParams = new URLSearchParams(window.location.search);
+      const complaintId = urlParams.get("id");
+      if (!complaintId) window.location.href = "/static/dashboard.html";
+      async function loadDetails() {
+        try {
+          const c = await api.get(`/complaints/${complaintId}`);
+          renderDetails(c);
+        } catch (error) {
+          showToast(error.message, "error");
+          showEmpty("content-container", "Failed to load details");
         }
-        function renderDetails(c) {
-            let html = `
+      }
+      function renderDetails(c) {
+        let html = `
                 <div class="card" style="margin-bottom: 2rem;">
                     <h2>${escapeHtml(c.title)}</h2>
-                    <p style="margin-top: 1rem;">${escapeHtml(c.description).replace(/\\n/g, '<br>')}</p>
+                    <p style="margin-top: 1rem;">${escapeHtml(c.description).replace(/\\n/g, "<br>")}</p>
                     <div class="grid" style="margin-top: 2rem;">
                         <div>
                             <p style="margin-bottom:0.25rem;">Status</p>
@@ -50,7 +50,7 @@
                         </div>
                         <div>
                             <p style="margin-bottom:0.25rem;">Category</p>
-                            <strong>${escapeHtml(c.domain_name || 'Unassigned')}</strong>
+                            <strong>${escapeHtml(c.domain_name || "Unassigned")}</strong>
                         </div>
                         <div>
                             <p style="margin-bottom:0.25rem;">Date Submitted</p>
@@ -59,72 +59,72 @@
                     </div>
                 </div>
             `;
-            if (c.ai_reason) {
-                html += `
+        if (c.ai_reason) {
+          html += `
                     <div class="card" style="margin-bottom: 2rem; background: var(--bg-alt);">
                         <h3>AI Analysis</h3>
                         <p style="margin: 0;">${escapeHtml(c.ai_reason)}</p>
                     </div>
                 `;
-            }
-            if (c.remarks) {
-                html += `
+        }
+        if (c.remarks) {
+          html += `
                     <div class="card" style="margin-bottom: 2rem;">
                         <h3>Staff Remarks</h3>
-                        <p style="margin: 0;">${escapeHtml(c.remarks).replace(/\\n/g, '<br>')}</p>
+                        <p style="margin: 0;">${escapeHtml(c.remarks).replace(/\\n/g, "<br>")}</p>
                     </div>
                 `;
-            }
-            if (user.role === 'domain_head' || user.role === 'admin') {
-                html += `
+        }
+        if (user.role === "domain_head" || user.role === "admin") {
+          html += `
                     <div class="card">
                         <h3>Update Complaint</h3>
                         <form id="updateForm" style="margin-top: 1rem;">
                             <div class="form-group">
                                 <label for="status">Status</label>
                                 <select id="status">
-                                    <option value="Submitted" ${c.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
-                                    <option value="Under Review" ${c.status === 'Under Review' ? 'selected' : ''}>Under Review</option>
-                                    <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                                    <option value="Resolved" ${c.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
-                                    <option value="Closed" ${c.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                                    <option value="Submitted" ${c.status === "Submitted" ? "selected" : ""}>Submitted</option>
+                                    <option value="Under Review" ${c.status === "Under Review" ? "selected" : ""}>Under Review</option>
+                                    <option value="In Progress" ${c.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                                    <option value="Resolved" ${c.status === "Resolved" ? "selected" : ""}>Resolved</option>
+                                    <option value="Closed" ${c.status === "Closed" ? "selected" : ""}>Closed</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="remarks">Remarks (visible to user)</label>
-                                <textarea id="remarks">${c.remarks || ''}</textarea>
+                                <textarea id="remarks">${c.remarks || ""}</textarea>
                             </div>
                             <button type="submit" class="btn btn-primary" id="updateBtn">Save Updates</button>
                         </form>
                     </div>
                 `;
-            }
-            document.getElementById('content-container').innerHTML = html;
-            const form = document.getElementById('updateForm');
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const btn = document.getElementById('updateBtn');
-                    btn.disabled = true;
-                    btn.textContent = 'Saving...';
-                    try {
-                        await api.put(`/complaints/${complaintId}`, {
-                            status: document.getElementById('status').value,
-                            remarks: document.getElementById('remarks').value
-                        });
-                        showToast('Complaint updated successfully', 'success');
-                        setTimeout(() => {
-                            window.location.href = '/static/complaint-history.html';
-                        }, 1000);
-                    } catch (err) {
-                        showToast(err.message, 'error');
-                        btn.disabled = false;
-                        btn.textContent = 'Save Updates';
-                    }
-                });
-            }
         }
-        loadDetails();
+        document.getElementById("content-container").innerHTML = html;
+        const form = document.getElementById("updateForm");
+        if (form) {
+          form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("updateBtn");
+            btn.disabled = true;
+            btn.textContent = "Saving...";
+            try {
+              await api.put(`/complaints/${complaintId}`, {
+                status: document.getElementById("status").value,
+                remarks: document.getElementById("remarks").value,
+              });
+              showToast("Complaint updated successfully", "success");
+              setTimeout(() => {
+                window.location.href = "/static/complaint-history.html";
+              }, 1000);
+            } catch (err) {
+              showToast(err.message, "error");
+              btn.disabled = false;
+              btn.textContent = "Save Updates";
+            }
+          });
+        }
+      }
+      loadDetails();
     </script>
-</body>
+  </body>
 </html>

@@ -1,9 +1,3 @@
-"""
-LangGraph Orchestrator  Coordinates the complete AI workflow.
-Workflow: Intake → Category → Priority → Assignment → Explanation → Save
-Uses LangGraph StateGraph to define the processing pipeline as a
-directed acyclic graph.
-"""
 from typing import TypedDict
 from uuid import UUID
 from langgraph.graph import StateGraph, END
@@ -15,9 +9,11 @@ from backend.agents.priority_agent import run_priority_agent
 from backend.agents.assignment_agent import run_assignment_agent
 from backend.agents.explanation_agent import run_explanation_agent
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
+
+
 class ComplaintState(TypedDict):
-    """State object passed through the LangGraph workflow."""
     raw_text: str
     title: str
     user_selected_domain: str
@@ -30,16 +26,18 @@ class ComplaintState(TypedDict):
     domain_id: UUID | None
     domain_head_id: UUID | None
     error: str | None
+
+
 def intake_node(state: ComplaintState) -> dict:
-    """Node 1: Clean and normalize the complaint text."""
     try:
         cleaned = run_intake_agent(state["raw_text"])
         return {"cleaned_text": cleaned}
     except Exception as e:
         logger.error("Intake Agent failed: %s", str(e))
         return {"cleaned_text": state["raw_text"]}
+
+
 def category_node(state: ComplaintState) -> dict:
-    """Node 2: Detect the complaint domain."""
     try:
         db: Session = state["db"]
         domains = db.query(Domain).all()
@@ -58,18 +56,18 @@ def category_node(state: ComplaintState) -> dict:
     except Exception as e:
         logger.error("Category Agent failed: %s", str(e))
         return {"detected_domain": state.get("user_selected_domain", "")}
+
+
 def priority_node(state: ComplaintState) -> dict:
-    """Node 3: Assign priority level."""
     try:
-        priority = run_priority_agent(
-            state["cleaned_text"], state["detected_domain"]
-        )
+        priority = run_priority_agent(state["cleaned_text"], state["detected_domain"])
         return {"priority": priority}
     except Exception as e:
         logger.error("Priority Agent failed: %s", str(e))
         return {"priority": "P3"}
+
+
 def assignment_node(state: ComplaintState) -> dict:
-    """Node 4: Assign complaint to a domain head."""
     try:
         db: Session = state["db"]
         result = run_assignment_agent(state["detected_domain"], db)
@@ -93,8 +91,9 @@ def assignment_node(state: ComplaintState) -> dict:
     except Exception as e:
         logger.error("Assignment Agent failed: %s", str(e))
         return {"assignment": None, "domain_id": None, "domain_head_id": None}
+
+
 def explanation_node(state: ComplaintState) -> dict:
-    """Node 5: Generate AI explanation."""
     try:
         explanation = run_explanation_agent(
             state["cleaned_text"],
@@ -107,12 +106,9 @@ def explanation_node(state: ComplaintState) -> dict:
         return {
             "explanation": f"Assigned priority {state.get('priority', 'P3')} based on complaint analysis."
         }
+
+
 def build_orchestrator_graph() -> StateGraph:
-    """
-    Build and compile the LangGraph orchestrator workflow.
-    Graph structure:
-        intake_agent → category_agent → priority_agent → assignment_agent → explanation_agent → END
-    """
     workflow = StateGraph(ComplaintState)
     workflow.add_node("intake_agent", intake_node)
     workflow.add_node("category_agent", category_node)
@@ -126,29 +122,17 @@ def build_orchestrator_graph() -> StateGraph:
     workflow.add_edge("assignment_agent", "explanation_agent")
     workflow.add_edge("explanation_agent", END)
     return workflow.compile()
+
+
 orchestrator_graph = build_orchestrator_graph()
+
+
 def run_orchestrator(
     title: str,
     description: str,
     user_selected_domain: str,
     db: Session,
 ) -> dict:
-    """
-    Run the complete AI orchestration workflow for a complaint.
-    Args:
-        title: Complaint title.
-        description: Complaint description (raw text from user).
-        user_selected_domain: Domain selected by the user.
-        db: Database session.
-    Returns:
-        Dictionary with all AI results:
-            - cleaned_text
-            - detected_domain
-            - priority
-            - domain_id
-            - domain_head_id
-            - explanation
-    """
     logger.info("Orchestrator: Starting AI workflow for complaint '%s'...", title)
     initial_state: ComplaintState = {
         "raw_text": f"{title}. {description}",

@@ -8,5 +8,5 @@ python-jose[cryptography]==3.4.0
 bcrypt==5.0.0
 python-dotenv==1.1.0
 python-multipart==0.0.20
-langchain-google-genai==2.1.4
+langchain-groq
 langgraph==0.4.1

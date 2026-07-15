@@ -1,27 +1,23 @@
-"""
-Pydantic schemas for complaint operations.
-"""
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, Field
+
+
 class ComplaintCreate(BaseModel):
-    """Schema for submitting a new complaint."""
-    title: str = Field(
-        ..., min_length=5, max_length=255, description="Complaint title"
-    )
-    description: str = Field(
-        ..., min_length=10, description="Complaint description"
-    )
+    title: str = Field(..., min_length=5, max_length=255, description="Complaint title")
+    description: str = Field(..., min_length=10, description="Complaint description")
     domain_id: UUID = Field(..., description="Selected domain ID")
+
+
 class ComplaintUpdate(BaseModel):
-    """Schema for updating a complaint (domain head actions)."""
     status: str | None = Field(
         None,
         description="New status: Submitted, Under Review, In Progress, Resolved, Closed",
     )
     remarks: str | None = Field(None, description="Domain head remarks")
+
+
 class ComplaintResponse(BaseModel):
-    """Schema for complaint data in list views. Never includes created_by."""
     id: UUID
     title: str
     description: str
@@ -36,8 +32,9 @@ class ComplaintResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     model_config = {"from_attributes": True}
+
+
 class ComplaintDetailResponse(BaseModel):
-    """Schema for detailed complaint view. Never includes created_by."""
     id: UUID
     title: str
     description: str
@@ -52,8 +49,9 @@ class ComplaintDetailResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     model_config = {"from_attributes": True}
+
+
 class ComplaintSubmitResponse(BaseModel):
-    """Schema for the response after submitting a complaint."""
     id: UUID
     title: str
     priority: str

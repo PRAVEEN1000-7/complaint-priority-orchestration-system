@@ -1,6 +1,3 @@
-"""
-Business logic for notification operations.
-"""
 from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -9,17 +6,11 @@ from backend.models.notification import Notification
 from backend.models.complaint import Complaint
 from backend.schemas.notification import NotificationResponse
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
+
+
 def get_user_notifications(user_id: UUID, db: Session) -> list[NotificationResponse]:
-    """
-    Get all notifications for a user, sorted by complaint priority (P1 first)
-    then by creation date (newest first).
-    Args:
-        user_id: The user's ID.
-        db: Database session.
-    Returns:
-        List of notification responses with complaint info.
-    """
     notifications = (
         db.query(Notification)
         .filter(Notification.user_id == user_id)
@@ -48,20 +39,11 @@ def get_user_notifications(user_id: UUID, db: Session) -> list[NotificationRespo
         )
     )
     return enriched
+
+
 def mark_notification_read(
     notification_id: UUID, user_id: UUID, db: Session
 ) -> NotificationResponse:
-    """
-    Mark a notification as read.
-    Args:
-        notification_id: Notification UUID.
-        user_id: The current user's ID (for ownership check).
-        db: Database session.
-    Returns:
-        Updated notification response.
-    Raises:
-        HTTPException 404: If notification not found or not owned by user.
-    """
     notification = (
         db.query(Notification)
         .filter(Notification.id == notification_id, Notification.user_id == user_id)
@@ -87,8 +69,9 @@ def mark_notification_read(
         read_status=notification.read_status,
         created_at=notification.created_at,
     )
+
+
 def get_unread_count(user_id: UUID, db: Session) -> int:
-    """Get the count of unread notifications for a user."""
     return (
         db.query(Notification)
         .filter(Notification.user_id == user_id, Notification.read_status == False)

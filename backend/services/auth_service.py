@@ -1,28 +1,20 @@
-"""
-Business logic for user registration and login.
-"""
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from backend.models.user import User
 from backend.auth.hashing import hash_password, verify_password
 from backend.auth.jwt_handler import create_access_token
-from backend.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, UserResponse
+from backend.schemas.auth import (
+    RegisterRequest,
+    LoginRequest,
+    TokenResponse,
+    UserResponse,
+)
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
+
+
 def register_user(request: RegisterRequest, db: Session) -> UserResponse:
-    """
-    Register a new user.
-    Validates:
-        - Passwords match
-        - Email is not already registered
-    Args:
-        request: Registration data.
-        db: Database session.
-    Returns:
-        The created user response.
-    Raises:
-        HTTPException 400: If passwords don't match or email already exists.
-    """
     if request.password != request.confirm_password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -45,17 +37,9 @@ def register_user(request: RegisterRequest, db: Session) -> UserResponse:
     db.refresh(new_user)
     logger.info("User registered: %s (ID: %s)", new_user.email, new_user.id)
     return UserResponse.model_validate(new_user)
+
+
 def login_user(request: LoginRequest, db: Session) -> TokenResponse:
-    """
-    Authenticate a user and return a JWT token.
-    Args:
-        request: Login credentials.
-        db: Database session.
-    Returns:
-        Token response with access token and user data.
-    Raises:
-        HTTPException 401: If email not found or password is incorrect.
-    """
     user = db.query(User).filter(User.email == request.email).first()
     if not user:
         raise HTTPException(

@@ -7,11 +7,15 @@ Priority Levels:
     - P4  Low
 Factors considered: Urgency, Impact, Keywords
 """
+
 from langchain_groq import ChatGroq
 from backend.database.config import settings
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
 VALID_PRIORITIES = ["P1", "P2", "P3", "P4"]
+
+
 def run_priority_agent(cleaned_text: str, domain: str) -> str:
     """
     Determine the priority level of the complaint.

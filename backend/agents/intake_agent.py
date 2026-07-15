@@ -5,10 +5,14 @@ Responsibilities:
     - Fix formatting issues
     - Standardize input for downstream agents
 """
+
 from langchain_groq import ChatGroq
 from backend.database.config import settings
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
+
+
 def run_intake_agent(complaint_text: str) -> str:
     """
     Clean and normalize the complaint text using Gemini.

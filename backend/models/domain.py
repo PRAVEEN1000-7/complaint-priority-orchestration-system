@@ -1,14 +1,12 @@
-"""
-Domain SQLAlchemy model.
-"""
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from backend.database.connection import Base
+
+
 class Domain(Base):
-    """Represents a complaint domain (e.g., Technical, Hostel, Library)."""
     __tablename__ = "domains"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     domain_name = Column(String(100), nullable=False, unique=True, index=True)
@@ -19,5 +17,6 @@ class Domain(Base):
         "DomainHead", back_populates="domain", cascade="all, delete-orphan"
     )
     complaints = relationship("Complaint", back_populates="domain")
+
     def __repr__(self):
         return f"<Domain(id={self.id}, name={self.domain_name})>"

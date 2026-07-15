@@ -5,10 +5,14 @@ Responsibilities:
     - Match to one of the available domains from the database
     - Return the best-matching domain name
 """
+
 from langchain_groq import ChatGroq
 from backend.database.config import settings
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
+
+
 def run_category_agent(cleaned_text: str, available_domains: list[str]) -> str:
     """
     Identify the complaint's domain from the available domains.

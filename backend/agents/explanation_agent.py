@@ -3,13 +3,15 @@ Explanation Agent  Generates a human-readable explanation of the AI decision.
 Provides a short explanation of why the complaint received its
 assigned priority and domain classification.
 """
+
 from langchain_groq import ChatGroq
 from backend.database.config import settings
 from backend.utils.logger import setup_logger
+
 logger = setup_logger(__name__)
-def run_explanation_agent(
-    cleaned_text: str, domain: str, priority: str
-) -> str:
+
+
+def run_explanation_agent(cleaned_text: str, domain: str, priority: str) -> str:
     """
     Generate a short explanation for the AI's priority and domain decision.
     Args:

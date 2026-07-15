@@ -1,14 +1,12 @@
-"""
-Complaint SQLAlchemy model.
-"""
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Text, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from backend.database.connection import Base
+
+
 class Complaint(Base):
-    """Represents a user-submitted complaint processed by the AI system."""
     __tablename__ = "complaints"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String(255), nullable=False)
@@ -53,5 +51,6 @@ class Complaint(Base):
     notifications = relationship(
         "Notification", back_populates="complaint", cascade="all, delete-orphan"
     )
+
     def __repr__(self):
         return f"<Complaint(id={self.id}, title={self.title}, priority={self.priority}, status={self.status})>"
