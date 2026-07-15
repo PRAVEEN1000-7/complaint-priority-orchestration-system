@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 from backend.database.connection import engine, Base, SessionLocal
 from backend.database.config import settings
 from backend.utils.logger import setup_logger
@@ -89,3 +90,9 @@ if os.path.isdir(frontend_path):
 @app.get("/api/health", tags=["Health"])
 async def health_check():
     return {"status": "healthy", "service": "Complaint Priority Orchestration System"}
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    """Redirect root to the login page."""
+    return RedirectResponse(url="/static/login.html")
