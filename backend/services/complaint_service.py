@@ -58,12 +58,14 @@ def _enrich_complaint(complaint: Complaint, db: Session) -> dict:
 def submit_complaint(
     request: ComplaintCreate, user_id: UUID, db: Session
 ) -> ComplaintSubmitResponse:
-    domain = db.query(Domain).filter(Domain.id == request.domain_id).first()
-    if not domain:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid domain",
-        )
+    domain = None
+    if request.domain_id:
+        domain = db.query(Domain).filter(Domain.id == request.domain_id).first()
+        if not domain:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid domain",
+            )
     complaint = Complaint(
         title=request.title,
         description=request.description,
@@ -80,7 +82,7 @@ def submit_complaint(
         ai_result = run_orchestrator(
             title=request.title,
             description=request.description,
-            user_selected_domain=domain.domain_name,
+            user_selected_domain=domain.domain_name if domain else None,
             db=db,
         )
         complaint.priority = ai_result.get("priority", "P3")

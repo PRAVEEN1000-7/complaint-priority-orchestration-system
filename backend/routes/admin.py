@@ -7,7 +7,8 @@ from backend.models.user import User
 from backend.models.domain import Domain
 from backend.models.domain_head import DomainHead
 from backend.models.complaint import Complaint
-from backend.schemas.auth import UserResponse
+from backend.schemas.auth import UserResponse, UserCreateAdmin
+from backend.auth.hashing import hash_password
 from backend.schemas.domain_head import (
     DomainHeadCreate,
     DomainHeadUpdate,
@@ -76,6 +77,36 @@ def list_users(
 ):
     users = db.query(User).order_by(User.created_at.desc()).all()
     return [UserResponse.model_validate(u) for u in users]
+
+
+@router.post("/users", response_model=UserResponse, status_code=201)
+def add_user(
+    request: UserCreateAdmin,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    from fastapi import HTTPException, status
+    existing = db.query(User).filter(User.email == request.email).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
+    if request.role not in ["admin", "domain_head", "user"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid role",
+        )
+    user = User(
+        name=request.name,
+        email=request.email,
+        password_hash=hash_password(request.password),
+        role=request.role,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return UserResponse.model_validate(user)
 
 
 @router.get("/statistics")

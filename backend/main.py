@@ -80,11 +80,13 @@ app.include_router(notification_router)
 app.include_router(dashboard_router)
 app.include_router(domain_head_router)
 frontend_path = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend"
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist"
 )
+
 if os.path.isdir(frontend_path):
-    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
-    logger.info("Frontend static files mounted at /static")
+    # Mount the assets directory specifically so static files are found
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="assets")
+    logger.info("Frontend assets mounted at /assets")
 
 
 @app.get("/api/health", tags=["Health"])
@@ -92,7 +94,10 @@ async def health_check():
     return {"status": "healthy", "service": "Complaint Priority Orchestration System"}
 
 
-@app.get("/", include_in_schema=False)
-async def root():
-    """Redirect root to the login page."""
-    return RedirectResponse(url="/static/login.html")
+# Catch-all route to serve the React SPA index.html
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_spa(full_path: str):
+    if os.path.isdir(frontend_path):
+        from fastapi.responses import FileResponse
+        return FileResponse(os.path.join(frontend_path, "index.html"))
+    return {"message": "Frontend not built. Run npm run build in frontend directory."}

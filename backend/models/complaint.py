@@ -14,7 +14,7 @@ class Complaint(Base):
     domain_id = Column(
         UUID(as_uuid=True),
         ForeignKey("domains.id", ondelete="RESTRICT"),
-        nullable=False,
+        nullable=True,
         index=True,
     )
     priority = Column(String(5), nullable=False, default="P4", index=True)

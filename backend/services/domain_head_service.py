@@ -35,20 +35,22 @@ def create_domain_head(request: DomainHeadCreate, db: Session) -> DomainHeadResp
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Domain not found",
         )
-    existing_user = db.query(User).filter(User.email == request.email).first()
-    if existing_user:
+    user = db.query(User).filter(User.id == request.user_id).first()
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
+            detail="User not found",
         )
-    user = User(
-        name=request.name,
-        email=request.email,
-        password_hash=hash_password(request.password),
-        role="domain_head",
-    )
-    db.add(user)
-    db.flush()
+    if user.role != "domain_head":
+        user.role = "domain_head"
+    
+    existing_link = db.query(DomainHead).filter(DomainHead.user_id == user.id, DomainHead.domain_id == domain.id).first()
+    if existing_link:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is already head of this domain",
+        )
+        
     domain_head = DomainHead(
         user_id=user.id,
         domain_id=request.domain_id,
@@ -57,6 +59,29 @@ def create_domain_head(request: DomainHeadCreate, db: Session) -> DomainHeadResp
     db.commit()
     db.refresh(domain_head)
     logger.info("Domain head created: %s for domain %s", user.email, domain.domain_name)
+    
+    # Check for unassigned complaints in this domain and assign them
+    try:
+        from backend.models.complaint import Complaint
+        from backend.models.notification import Notification
+        unassigned_complaints = (
+            db.query(Complaint)
+            .filter(Complaint.domain_id == domain.id, Complaint.assigned_domain_head == None, Complaint.status.in_(["Submitted", "Under Review"]))
+            .all()
+        )
+        for complaint in unassigned_complaints:
+            complaint.assigned_domain_head = domain_head.id
+            notification = Notification(
+                complaint_id=complaint.id,
+                user_id=user.id,
+                message=f"New {complaint.priority} complaint assigned to you: {complaint.title}",
+            )
+            db.add(notification)
+        db.commit()
+    except Exception as e:
+        logger.error("Failed to retroactively assign complaints to new domain head: %s", str(e))
+        db.rollback()
+
     return _build_response(domain_head, db)
 
 

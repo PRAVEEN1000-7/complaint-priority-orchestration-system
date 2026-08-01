@@ -11,6 +11,12 @@ class RegisterRequest(BaseModel):
         ..., min_length=6, max_length=128, description="Password confirmation"
     )
 
+class UserCreateAdmin(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100, description="User's full name")
+    email: EmailStr = Field(..., description="User's email address")
+    password: str = Field(..., min_length=6, max_length=128, description="Password")
+    role: str = Field(..., description="User's role (admin, domain_head, user)")
+
 
 class LoginRequest(BaseModel):
     email: EmailStr = Field(..., description="User's email address")

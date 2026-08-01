@@ -15,7 +15,7 @@ logger = setup_logger(__name__)
 
 def run_intake_agent(complaint_text: str) -> str:
     """
-    Clean and normalize the complaint text using Gemini.
+    Clean and normalize the complaint text using Groq.
     Args:
         complaint_text: Raw complaint description from the user.
     Returns:

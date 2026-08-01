@@ -3,11 +3,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 class DomainHeadCreate(BaseModel):
-    name: str = Field(
-        ..., min_length=2, max_length=100, description="Domain head's name"
-    )
-    email: EmailStr = Field(..., description="Domain head's email")
-    password: str = Field(..., min_length=6, max_length=128, description="Password")
+    user_id: UUID = Field(..., description="User ID to assign as domain head")
     domain_id: UUID = Field(..., description="Domain to assign")
 
 

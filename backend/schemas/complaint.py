@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class ComplaintCreate(BaseModel):
     title: str = Field(..., min_length=5, max_length=255, description="Complaint title")
     description: str = Field(..., min_length=10, description="Complaint description")
-    domain_id: UUID = Field(..., description="Selected domain ID")
+    domain_id: UUID | None = Field(None, description="Selected domain ID")
 
 
 class ComplaintUpdate(BaseModel):
@@ -21,7 +21,7 @@ class ComplaintResponse(BaseModel):
     id: UUID
     title: str
     description: str
-    domain_id: UUID
+    domain_id: UUID | None
     domain_name: str | None = None
     priority: str
     status: str
@@ -38,7 +38,7 @@ class ComplaintDetailResponse(BaseModel):
     id: UUID
     title: str
     description: str
-    domain_id: UUID
+    domain_id: UUID | None
     domain_name: str | None = None
     priority: str
     status: str

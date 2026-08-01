@@ -16,7 +16,7 @@ An AI-powered complaint management system that automatically analyzes complaints
 
 | Layer    | Technology                      |
 | -------- | ------------------------------- |
-| Frontend | HTML5, CSS3, Vanilla JavaScript |
+| Frontend | React 19, Vite, Tailwind v4     |
 | Backend  | FastAPI, SQLAlchemy, Pydantic   |
 | Database | PostgreSQL                      |
 | AI       | Groq API, LangGraph             |
@@ -61,10 +61,19 @@ pip install -r requirements.txt
 uvicorn backend.main:app --reload
 ```
 
-The app will start at `http://localhost:8000`.
+The backend API will start at `http://localhost:8000`.
 
-- Frontend: `http://localhost:8000/static/login.html`
 - API Docs: `http://localhost:8000/docs`
+
+### 6. Run the Frontend (React/Vite)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend will start at `http://localhost:8081` (or `5173`).
 
 ### 6. Default Admin Login
 
@@ -87,9 +96,10 @@ complaint-priority-system/
 │   ├── utils/              # Logger & helpers
 │   └── main.py             # FastAPI entry point
 ├── frontend/
-│   ├── css/style.css       # Design system
-│   ├── js/                 # API client & utilities
-│   └── *.html              # Pages
+│   ├── src/                # React components & routes
+│   ├── vite.config.ts      # Vite configuration
+│   └── package.json        # Frontend dependencies
+├── frontend-legacy/        # Old HTML/JS frontend
 ├── database/
 │   └── schema.sql          # PostgreSQL schema
 ├── requirements.txt

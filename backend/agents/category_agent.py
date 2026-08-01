@@ -35,18 +35,23 @@ Instructions:
 - Read the complaint carefully
 - Match it to the MOST appropriate domain from the available list
 - Return ONLY the exact domain name from the list, nothing else
-- If no domain matches well, return the closest match
+- If NONE of the available domains are a good logical match for this complaint, return "Unassigned"
 Complaint Text:
 {cleaned_text}
 Domain:"""
     response = llm.invoke(prompt)
     detected_domain = response.content.strip()
+    if detected_domain.lower() == "unassigned":
+        logger.info("Category Agent: AI determined no suitable domain exists.")
+        return "Unassigned"
+        
     for domain in available_domains:
         if domain.lower() == detected_domain.lower():
             logger.info("Category Agent: Domain detected  %s", domain)
             return domain
+            
     logger.warning(
-        "Category Agent: AI returned '%s' which is not in available domains. Using first domain as fallback.",
+        "Category Agent: AI returned '%s' which is not in available domains. Defaulting to Unassigned.",
         detected_domain,
     )
-    return available_domains[0] if available_domains else detected_domain
+    return "Unassigned"
