@@ -12,6 +12,6 @@ cd ..
 
 # Install backend requirements
 echo "Installing backend requirements..."
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 
 echo "Build completed successfully!"
