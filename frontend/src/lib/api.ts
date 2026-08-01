@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:8000/api" : "/api";
+export const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:8000/api" : "/api";
 
 const TOKEN_KEY = "complaint_os_token";
 const USER_KEY = "complaint_os_user";
