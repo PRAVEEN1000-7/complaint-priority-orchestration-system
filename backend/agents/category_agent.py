@@ -24,7 +24,7 @@ def run_category_agent(cleaned_text: str, available_domains: list[str]) -> str:
     """
     logger.info("Category Agent: Detecting complaint domain...")
     llm = ChatGroq(
-        model="openai/gpt-oss-safeguard-20b",
+        model="openai/gpt-oss-20b",
         api_key=settings.GROQ_API_KEY,
         temperature=0.1,
     )

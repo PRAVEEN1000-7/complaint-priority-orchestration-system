@@ -23,7 +23,7 @@ def run_explanation_agent(cleaned_text: str, domain: str, priority: str) -> str:
     """
     logger.info("Explanation Agent: Generating AI explanation...")
     llm = ChatGroq(
-        model="openai/gpt-oss-safeguard-20b",
+        model="openai/gpt-oss-20b",
         api_key=settings.GROQ_API_KEY,
         temperature=0.1,
     )
