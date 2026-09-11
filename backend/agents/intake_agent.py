@@ -23,7 +23,7 @@ def run_intake_agent(complaint_text: str) -> str:
     """
     logger.info("Intake Agent: Processing complaint text...")
     llm = ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-safeguard-20b",
         api_key=settings.GROQ_API_KEY,
         temperature=0.1,
     )
